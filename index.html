@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전북 기후테크-순환경제 활성화 전략</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0d9488;
+            border-bottom-color: #0d9488;
+        }
+        /* Adjusted card styles for modal trigger */
+        .clickable-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%; /* Ensure consistent height for grid */
+        }
+        .clickable-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .accent-icon {
+            font-size: 2.5rem;
+            line-height: 1;
+            color: #0d9488;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        section {
+            scroll-margin-top: 80px; /* Adjust for sticky header height */
+        }
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+        #loading-indicator {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Agenda Roadmap Styles */
+        .roadmap-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .roadmap-icon {
+            font-size: 3rem;
+            line-height: 1;
+            color: #0d9488;
+            margin-bottom: 0.5rem;
+        }
+        .roadmap-line {
+            width: 2px;
+            height: 40px; /* Adjust height for spacing between steps */
+            background-color: #cbd5e1;
+            margin: 0 auto;
+        }
+        .roadmap-step:last-child .roadmap-line {
+            display: none;
+        }
+        @media (min-width: 768px) {
+            .roadmap-container {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+            .roadmap-step {
+                flex: 1;
+                margin: 0 1rem;
+                position: relative;
+            }
+            .roadmap-step:first-child { margin-left: 0; }
+            .roadmap-step:last-child { margin-right: 0; }
+            .roadmap-line {
+                width: 100%;
+                height: 2px;
+                background-color: #cbd5e1;
+                position: absolute;
+                top: 2rem; /* Align with icon center */
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: -1;
+            }
+            .roadmap-step:last-child .roadmap-line {
+                display: block; /* Show for horizontal flow */
+                width: 50%; /* Only extend halfway */
+                left: 0;
+            }
+            .roadmap-step:first-child .roadmap-line {
+                width: 50%; /* Only extend halfway */
+                right: 0;
+                left: auto;
+                transform: translateX(50%);
+            }
+        }
+        /* Ensure full words for headings */
+        .full-word-heading {
+            white-space: nowrap;
+        }
+        /* Custom styles for the roadmap icons/boxes */
+        .roadmap-box {
+            background-color: #e0f2f7; /* light blue-green */
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+        .roadmap-box .text-3xl {
+            color: #0d9488; /* teal */
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-slate-800">전북 기후테크-순환경제 전략</h1>
+                </div>
+                <div class="hidden md:flex items-baseline space-x-4">
+                    <a href="#intro" class="nav-link px-3 py-2 text-sm font-medium text-slate-600 border-b-2 border-transparent">소개</a>
+                    <a href="#market" class="nav-link px-3 py-2 text-sm font-medium text-slate-600 border-b-2 border-transparent">시장 동향</a>
+                    <a href="#strategy" class="nav-link px-3 py-2 text-sm font-medium text-slate-600 border-b-2 border-transparent">핵심 전략</a>
+                    <a href="#jeonbuk" class="nav-link px-3 py-2 text-sm font-medium text-slate-600 border-b-2 border-transparent">전북의 기회</a>
+                    <a href="#ecosystem" class="nav-link px-3 py-2 text-sm font-medium text-slate-600 border-b-2 border-transparent">협력 생태계</a>
+                    <a href="#agenda" class="nav-link px-3 py-2 text-sm font-medium text-slate-600 border-b-2 border-transparent">전략 아젠다</a>
+                    <button id="open-idea-modal-desktop" class="nav-link px-3 py-2 text-sm font-medium text-teal-600 border-b-2 border-transparent hover:border-teal-600">아이디어 생성</button>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500">
+                        <span class="sr-only">메뉴 열기</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+             <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#intro" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-slate-600">소개</a>
+                    <a href="#market" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-slate-600">시장 동향</a>
+                    <a href="#strategy" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-slate-600">핵심 전략</a>
+                    <a href="#jeonbuk" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-slate-600">전북의 기회</a>
+                    <a href="#ecosystem" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-slate-600">협력 생태계</a>
+                    <a href="#agenda" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-slate-600">전략 아젠다</a>
+                    <button id="open-idea-modal-mobile" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-teal-600">아이디어 생성</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="intro" class="py-16 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <p class="text-base font-semibold text-teal-600 tracking-wide uppercase">민관 협력 확대 전략 제안</p>
+                <h2 class="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">전북의 미래, 기후테크와 순환경제에서 길을 찾다</h2>
+                <p class="mt-6 max-w-2xl mx-auto text-lg leading-8 text-slate-600">본 문서는 단기적인 사업 보고를 넘어, 전북의 지속가능한 미래 성장 동력을 확보하기 위한 거시적이고 전략적인 논의를 제안합니다. 기후테크와 순환경제라는 글로벌 메가트렌드 속에서 전북만의 특화된 생태계를 구축하고, 민관이 협력하여 새로운 가치를 창출하기 위한 비전과 실행 방안을 담고 있습니다.</p>
+                <p class="mt-4 max-w-2xl mx-auto text-lg leading-8 text-slate-600"><strong>엠와이소셜컴퍼니(MYSC)는 '혁신가를 돕는 혁신조직'으로서, 사회적 기업 인큐베이팅부터 컨설팅, 액셀러레이팅, 임팩트 투자에 이르기까지 폭넓은 경험과 전문성을 보유하고 있습니다.</strong> 특히 복잡한 사회문제 해결을 위해 스타트업, 대기업, 공공기관 등 다양한 주체들의 '섹터 간 협력'을 촉진하는 데 주력하며, 혼합금융 기반의 ESG 임팩트 투자 사업을 통해 임팩트 생태계를 확장하고 있습니다. 이번 회의를 통해 MYSC는 단순한 사업 참여자를 넘어, 전북 지역의 기후테크-순환경제 생태계를 구축하고 촉진하는 핵심 주체로서 민관 협력의 새로운 방향성을 제시하고자 합니다.</p>
+            </div>
+        </section>
+        
+        <section id="market" class="py-16 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl full-word-heading">폭발적으로 성장하는 기회: 글로벌 기후테크 & 순환경제 시장 동향</h3>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">기후변화는 인류가 직면한 가장 큰 도전 과제인 동시에, 기후테크와 순환경제라는 거대한 새로운 시장을 창출하고 있습니다. 이 시장은 단순한 환경 보호를 넘어, 혁신적인 기술과 비즈니스 모델을 통해 막대한 경제적 가치를 창출하며 글로벌 산업 지형을 재편하고 있습니다. 지금이 바로 이 거대한 변화의 흐름에 전략적으로 동참하고 선도할 최적의 시점입니다.</p>
+                </div>
+
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-center">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="text-xl font-bold text-center text-slate-800 full-word-heading">글로벌 기후테크 시장 규모 전망</h4>
+                        <div class="chart-container mt-4">
+                            <canvas id="climateTechChart"></canvas>
+                        </div>
+                         <p class="text-sm text-slate-500 text-center mt-2">Fortune Business Insights에 따르면, 글로벌 기후 기술 시장은 2024년 253.2억 달러에서 2032년 1,492.7억 달러까지 연평균 24.9% 성장할 것으로 전망됩니다. 이러한 고성장은 기후변화 대응 노력과 기술 혁신이 결합된 결과입니다.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="text-xl font-bold text-center text-slate-800 full-word-heading">글로벌 순환경제 시장 규모 전망</h4>
+                        <div class="chart-container mt-4">
+                            <canvas id="circularEconomyChart"></canvas>
+                        </div>
+                         <p class="text-sm text-slate-500 text-center mt-2">Next Move Strategy Consulting은 글로벌 순환경제 시장이 2023년 5,560억 달러에서 2030년 1조 3,235억 달러로 연평균 13.2% 성장할 것으로 예측합니다. 순환경제 전환은 2030년까지 최대 4.5조 달러의 경제적 이익을 창출할 잠재력을 가지고 있습니다.</p>
+                    </div>
+                </div>
+
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="text-xl font-bold text-center text-slate-800 full-word-heading">글로벌 기후테크 VC 투자 동향 (2021-2024)</h4>
+                        <div class="chart-container mt-4">
+                            <canvas id="globalVcClimateTechChart"></canvas>
+                        </div>
+                         <p class="text-sm text-slate-500 text-center mt-2">2023년 고금리 및 지정학적 불안정성으로 전체 VC 투자는 감소했으나, 기후테크 분야는 AI 접목 기술, 에너지 솔루션 등에 투자가 집중되며 여전히 강력한 성장 잠재력을 보여주고 있습니다.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="text-xl font-bold text-center text-slate-800 full-word-heading">국내 기후변화대응 R&D 투자 예산 (2023-2025)</h4>
+                        <div class="chart-container mt-4">
+                            <canvas id="koreaRndInvestmentChart"></canvas>
+                        </div>
+                         <p class="text-sm text-slate-500 text-center mt-2">과학기술정보통신부는 2025년 기후변화대응 R&D에 2.75조 원을 투입하며, 온실가스 감축 분야에 집중 투자할 계획입니다. 이는 국내 기후테크 성장을 위한 정부의 강력한 의지를 나타냅니다.</p>
+                    </div>
+                </div>
+
+                <div class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 text-center">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="text-xl font-bold text-slate-800 full-word-heading">VC 투자의 미개척 기회</h4>
+                        <div class="h-48 w-48 mx-auto mt-4">
+                            <canvas id="vcInvestmentChart"></canvas>
+                        </div>
+                        <p class="mt-4 text-slate-600">VC 투자는 탄소배출량의 16%를 차지하는 모빌리티/운송 분야에 61%가 집중되어 있습니다. 반면, 제조, 식품, 농업, 건설 등 탄소배출 감축 잠재력이 84%에 달하는 분야는 39%의 투자만을 받고 있어, 이 분야의 미개척 성장 잠재력이 매우 높습니다.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-center">
+                        <h4 class="text-xl font-bold text-slate-800 full-word-heading">대한민국의 강력한 정책 의지</h4>
+                        <p class="text-4xl font-bold text-teal-600 mt-4">약 2.75조 원</p>
+                        <p class="mt-2 text-slate-600">2025년 과학기술정보통신부는 기후변화대응 R&D에 전년 대비 3.9% 증가한 약 2조 7,496억 원(약 19억 달러)을 투입할 예정이며, 이는 정부의 강력한 기후테크 육성 의지를 반영합니다.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-center">
+                         <h4 class="text-xl font-bold text-slate-800 full-word-heading">순환경제 규제 강화와 신시장 창출</h4>
+                         <div class="mt-4">
+                            <p class="text-2xl font-bold text-sky-600">PET 최소 10% 의무화</p>
+                            <p class="mt-2 text-slate-600">2026년부터 음료 제조업체는 제품에 최소 10%의 재활용 플라스틱 원료를 사용해야 합니다. 이러한 규제는 새로운 재활용 기술 및 순환 비즈니스 모델 개발을 촉진하는 강력한 동인이 될 것입니다.</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategy" class="py-16 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl full-word-heading">핵심 전략: 순환경제 비즈니스 모델의 이해와 적용</h3>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">기후 위기 대응의 핵심 솔루션인 순환경제는 자원의 효율성을 극대화하고 폐기물을 최소화하며 새로운 경제적 가치를 창출하는 혁신적인 접근 방식입니다. 액센츄어(Accenture)가 제시하는 5가지 핵심 비즈니스 모델은 기업이 순환경제 전환을 통해 경쟁 우위를 확보하고 지속가능한 성장을 이룰 수 있는 구체적인 경로를 제시합니다. 각 모델에 대한 자세한 설명을 통해 전략적 적용 방안을 모색해 보시기 바랍니다. 아래 카드를 클릭하여 각 모델을 자세히 알아보세요.</p>
+                </div>
+                <div id="accenture-models" class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                </div>
+            </div>
+        </section>
+
+        <div id="idea-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <button class="modal-close-btn" id="close-idea-modal">&times;</button>
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl full-word-heading">✨ 순환경제 아이디어 브레인스토밍 ✨</h3>
+                    <p class="mt-4 text-lg text-slate-600">어떤 산업 분야나 폐기물 유형에 대한 순환경제 아이디어를 찾고 계신가요? 아래에 입력하시면 Gemini AI가 혁신적인 비즈니스 아이디어를 제안해 드립니다.</p>
+                </div>
+                <div class="mt-8 bg-white p-8 rounded-xl shadow-md">
+                    <div class="mb-4">
+                        <label for="idea-input" class="block text-sm font-medium text-slate-700 mb-2">산업 분야 또는 폐기물 유형 (예: 음식물 쓰레기, 섬유, 전자제품)</label>
+                        <input type="text" id="idea-input" class="w-full p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="예: 폐 플라스틱">
+                    </div>
+                    <button id="generate-idea-btn" class="w-full bg-teal-600 text-white py-3 px-4 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 flex items-center justify-center">
+                        <span id="button-text">아이디어 생성</span>
+                        <div id="loading-indicator" class="ml-2 hidden"></div>
+                    </button>
+                    <div id="idea-results" class="mt-8 p-6 bg-slate-50 rounded-md border border-slate-200 min-h-[100px] text-slate-800 hidden">
+                        <p class="text-lg font-semibold mb-4">제안된 아이디어:</p>
+                        <div id="idea-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section id="jeonbuk" class="py-16 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl full-word-heading">전북의 기회: 강점 산업과 순환경제의 융합을 통한 시너지</h3>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600">전북은 농생명, 식품, 이차전지, 신재생에너지 등 명확한 산업적 강점을 보유하고 있으며, 이러한 특화 산업과 순환경제 모델을 전략적으로 융합할 때 지역 경제의 새로운 성장 동력을 확보하고 전국을 선도하는 고부가가치 산업 생태계를 구축할 수 있습니다. 각 산업별 순환경제 전환 기회와 기대 효과는 다음과 같습니다.</p>
+                </div>
+
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-xl shadow-lg border-t-4 border-teal-500">
+                        <div class="flex items-center">
+                            <div class="accent-icon">🌾</div>
+                            <h4 class="ml-4 text-2xl font-bold text-slate-800 full-word-heading">농생명 & 식품</h4>
+                        </div>
+                        <p class="mt-4 text-slate-600">전북의 대표 산업인 농생명 및 식품 분야는 음식물 쓰레기 저감, 부산물 재자원화, 친환경 패키징 개발 등을 통해 순환경제 전환의 큰 잠재력을 가집니다.</p>
+                        <ul class="mt-4 space-y-2 text-slate-600">
+                            <li class="flex items-start"><span class="text-teal-500 font-bold mr-2">✓</span><span>음식물 쓰레기 업사이클링을 통한 바이오 에너지 및 사료화</span></li>
+                            <li class="flex items-start"><span class="text-teal-500 font-bold mr-2">✓</span><span>생분해성/재활용 가능한 친환경 식품 포장재 개발 및 적용 확대</span></li>
+                            <li class="flex items-start"><span class="text-teal-500 font-bold mr-2">✓</span><span>스마트팜 기반 자원 효율성 증대 및 탄소 배출 저감 기술 도입</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg border-t-4 border-sky-500">
+                        <div class="flex items-center">
+                            <div class="accent-icon">🔋</div>
+                            <h4 class="ml-4 text-2xl font-bold text-slate-800 full-word-heading">이차전지</h4>
+                        </div>
+                        <p class="mt-4 text-slate-600">미래 모빌리티 및 에너지 저장의 핵심인 이차전지 산업은 폐배터리 재활용 및 재사용을 통한 핵심 광물 확보와 순환 공급망 구축이 필수적입니다.</p>
+                         <ul class="mt-4 space-y-2 text-slate-600">
+                            <li class="flex items-start"><span class="text-sky-500 font-bold mr-2">✓</span><span>폐배터리 고효율 회수 및 재활용 기술 고도화 및 산업화</span></li>
+                            <li class="flex items-start"><span class="text-sky-500 font-bold mr-2">✓</span><span>사용 후 배터리 재사용 및 재제조 시장 활성화 및 인증 체계 구축</span></li>
+                            <li class="flex items-start"><span class="text-sky-500 font-bold mr-2">✓</span><span>서비스형 배터리(BaaS) 모델 도입을 통한 자원 순환 촉진 및 비즈니스 확장</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg border-t-4 border-emerald-500">
+                        <div class="flex items-center">
+                            <div class="accent-icon">♻️</div>
+                            <h4 class="ml-4 text-2xl font-bold text-slate-800 full-word-heading">신재생에너지</h4>
+                        </div>
+                        <p class="mt-4 text-slate-600">에너지 전환 시대에 발맞춰 태양광 패널, 풍력 터빈 등 신재생에너지 발전 설비의 생산-사용-폐기 전 과정에 걸친 순환성을 높여야 합니다.</p>
+                         <ul class="mt-4 space-y-2 text-slate-600">
+                            <li class="flex items-start"><span class="emerald-500 font-bold mr-2">✓</span><span>태양광 폐패널, 풍력 폐블레이드 등 폐기물 재활용 및 재사용 기술 개발</span></li>
+                            <li class="flex items-start"><span class="emerald-500 font-bold mr-2">✓</span><span>에너지 저장장치(ESS)의 재제조 및 수명 연장 기술 개발 및 상용화</span></li>
+                             <li class="flex items-start"><span class="emerald-500 font-bold mr-2">✓</span><span>지역 기반 스마트 그리드 및 에너지 공유 시스템 구축을 통한 효율 극대화</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ecosystem" class="py-16 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl full-word-heading">함께 만드는 협력 생태계: 유관기관별 시너지 전략</h3>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600">전북의 기후테크-순환경제 생태계는 개별 기관의 역량을 넘어선 유기적인 협력을 통해 비약적인 발전을 이룰 수 있습니다. 각 참여 기관의 고유한 강점과 엠와이소셜컴퍼니(MYSC)의 임팩트 투자 및 액셀러레이팅 전문성을 결합하여 최대의 시너지를 창출하는 전략을 소개합니다. 아래 카드를 클릭하여 각 기관의 핵심 역할과 MYSC와의 구체적인 협력 방안을 확인해보세요.</p>
+                </div>
+                
+                <div id="org-cards" class="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                </div>
+            </div>
+        </section>
+
+        <section id="agenda" class="py-16 sm:py-24">
+             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl full-word-heading">나아가야 할 길: 전북형 기후테크-순환경제 미래를 위한 전략적 아젠다</h3>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600">이번 회의는 단순한 사업 진행 보고를 넘어, 전북의 지속가능한 미래를 위한 핵심 의사결정의 장이 되어야 합니다. 아래 제안하는 두 가지 거시적 아젠다는 전북이 기후테크와 순환경제 분야에서 전국을 선도하고, 장기적인 투자와 협력을 유치하기 위한 필수적인 전략적 논의 과제입니다. 이러한 아젠다를 중심으로 각 기관의 역량을 결집하여 실질적인 성과를 창출할 수 있기를 기대합니다.</p>
+                </div>
+                
+                <div class="mt-16 max-w-4xl mx-auto grid grid-cols-1 gap-8"> <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                        <div class="p-8">
+                            <div class="flex items-center">
+                                <span class="text-3xl">🗺️</span>
+                                <h4 class="ml-4 text-2xl font-bold text-slate-800 full-word-heading">아젠다 1: 전북형 기후테크-순환경제 장기 비전 및 로드맵 공동 수립</h4>
+                            </div>
+                            <p class="mt-4 text-slate-600">전북의 특화 산업 강점을 극대화하고 국가 기후변화 대응 전략에 발맞춰, 지역의 고유한 특성을 반영한 기후테크-순환경제 장기 비전과 구체적인 실행 로드맵을 공동으로 수립해야 합니다. 특히, 각 기관의 노력이 분산되지 않도록 '사일로 효과'를 극복하고 민관 전반에 걸쳐 시너지를 창출할 수 있는 통합적 거버넌스 모델 구축 방안을 심도 깊게 논의해야 합니다. 이는 정책 일관성을 확보하고, 잠재적 민간 투자자들에게 전북 이니셔티브에 대한 높은 신뢰도를 제공할 것입니다.</p>
+                            <ul class="mt-4 space-y-2 text-sm text-slate-600">
+                                <li><span class="font-semibold">목표:</span> 지역 특성을 반영한 선도적인 기후테크-순환경제 생태계 비전 확립</li>
+                                <li><span class="font-semibold">핵심 논의:</span> 통합적 거버넌스 모델 및 상호 보완적 역할 분담 체계 구축</li>
+                                <li><span class="font-semibold">기대효과:</span> 지속가능한 성장 기반 마련 및 외부 투자 유치 경쟁력 강화</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                        <div class="p-8">
+                            <div class="flex items-center">
+                                <span class="text-3xl">📊</span>
+                                <h4 class="ml-4 text-2xl font-bold text-slate-800 full-word-heading">아젠다 2: 기후테크-순환경제 사업의 임팩트 측정 및 성과 관리 프레임워크 도입</h4>
+                            </div>
+                            <p class="mt-4 text-slate-600">기후테크 및 순환경제 사업의 단순한 재무적 성과를 넘어, 탄소 감축량, 자원 효율성 증대, 폐기물 감소 등 측정 가능한 사회적 및 환경적 임팩트를 객관적으로 측정하고 관리하는 프레임워크를 도입하는 것이 필수적입니다. 엠와이소셜컴퍼니의 UN SDGs 기반 임팩트 측정 전문성을 활용하여 공동 임팩트 지표를 개발하고 데이터 기반 성과 관리 시스템을 구축해야 합니다. 이를 통해 사업의 투명성을 높이고, 측정된 임팩트 데이터를 기반으로 투자 유치 제안서 개발 및 정부 지원 프로그램 연계, 대기업과의 협력 시 ESG 성과 지표 활용 등 실질적인 자금 확보 방안을 모색해야 합니다. 이는 전북 지역의 기후테크-순환경제 생태계가 더욱 견고하고 매력적인 투자처로 성장하는 데 기여할 것입니다.</p>
+                             <ul class="mt-4 space-y-2 text-sm text-slate-600">
+                                <li><span class="font-semibold">목표:</span> 비재무적 성과 측정 및 관리 시스템 확립을 통한 사업 가치 증명</li>
+                                <li><span class="font-semibold">핵심 논의:</span> 공동 임팩트 지표 개발, 데이터 통합 관리, 활용 전략 구체화</li>
+                                <li><span class="font-semibold">기대효과:</span> 임팩트 투자 유치 확대 및 대외 신뢰도 제고</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-16 text-center">
+                    <h4 class="text-2xl font-bold text-slate-800 full-word-heading">전략적 아젠다 추진 로드맵</h4>
+                    <div class="mt-8 roadmap-container flex flex-col md:flex-row justify-center items-center md:items-start">
+                        <div class="roadmap-step">
+                            <div class="roadmap-box"><span class="text-3xl">💡</span></div>
+                            <p class="font-medium text-slate-800">1단계: 비전 수립</p>
+                            <p class="text-sm text-slate-600">전북 특화 비전 및 로드맵 정립</p>
+                            <div class="roadmap-line"></div>
+                        </div>
+                        <div class="roadmap-step">
+                            <div class="roadmap-box"><span class="text-3xl">🤝</span></div>
+                            <p class="font-medium text-slate-800">2단계: 거버넌스 구축</p>
+                            <p class="text-sm text-slate-600">기관별 역할 정립 및 협력체계 강화</p>
+                            <div class="roadmap-line"></div>
+                        </div>
+                        <div class="roadmap-step">
+                            <div class="roadmap-box"><span class="text-3xl">📈</span></div>
+                            <p class="font-medium text-slate-800">3단계: 임팩트 측정</p>
+                            <p class="text-sm text-slate-600">공동 지표 개발 및 시스템 도입</p>
+                            <div class="roadmap-line"></div>
+                        </div>
+                        <div class="roadmap-step">
+                            <div class="roadmap-box"><span class="text-3xl">💰</span></div>
+                            <p class="font-medium text-slate-800">4단계: 투자 유치</p>
+                            <p class="text-sm text-slate-600">데이터 기반 투자 제안 및 자금 확보</p>
+                            <div class="roadmap-line"></div>
+                        </div>
+                        <div class="roadmap-step">
+                            <div class="roadmap-box"><span class="text-3xl">🚀</span></div>
+                            <p class="font-medium text-slate-800">5단계: 지속 성장</p>
+                            <p class="text-sm text-slate-600">생태계 고도화 및 전국적 선도</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800">
+        <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-slate-400">
+            <p>&copy; 2025. Proposal for Jeonbuk Climate Tech & Circular Economy Ecosystem. All rights reserved.</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const climateTechData = {
+        labels: ['2024', '2025', '2032'],
+        datasets: [{
+            label: '시장 규모 (십억 달러)',
+            data: [25.32, 31.45, 149.27],
+            borderColor: '#0d9488',
+            backgroundColor: 'rgba(13, 148, 136, 0.1)',
+            fill: true,
+            tension: 0.4
+        }]
+    };
+    const climateTechChartCtx = document.getElementById('climateTechChart').getContext('2d');
+    new Chart(climateTechChartCtx, {
+        type: 'line',
+        data: climateTechData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: '규모 (십억 USD)' }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    const circularEconomyData = {
+        labels: ['2023', '2030'],
+        datasets: [{
+            label: '시장 규모 (십억 달러)',
+            data: [556.0, 1323.5],
+            borderColor: '#0ea5e9',
+            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+            fill: true,
+            tension: 0.4,
+            type: 'bar'
+        }]
+    };
+    const circularEconomyChartCtx = document.getElementById('circularEconomyChart').getContext('2d');
+    new Chart(circularEconomyChartCtx, {
+        type: 'bar',
+        data: circularEconomyData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: '규모 (십억 USD)' }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+    
+    // New Chart: Global Climate Tech VC Investment Trends
+    const globalVcClimateTechData = {
+        labels: ['2021', '2022', '2023', '2024'],
+        datasets: [{
+            label: 'VC 투자 (십억 USD)',
+            data: [40.0, 91.1, 63.8, 70.0], // Illustrative data, 2023 is from source, 2024 is estimated rebound
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            fill: true,
+            tension: 0.4
+        }]
+    };
+    const globalVcClimateTechChartCtx = document.getElementById('globalVcClimateTechChart').getContext('2d');
+    new Chart(globalVcClimateTechChartCtx, {
+        type: 'line',
+        data: globalVcClimateTechData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: '규모 (십억 USD)' }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    // New Chart: Korea R&D Investment Growth
+    const koreaRndInvestmentData = {
+        labels: ['2023', '2024', '2025'],
+        datasets: [{
+            label: '투자 예산 (조 원)',
+            data: [2.64, 2.64 * 0.899, 2.75], // 2023 base, 2024 is 10.1% decrease from 2023. 2025 is actual.
+            backgroundColor: ['#10b981', '#fbbf24', '#0d9488'],
+            borderColor: '#0d9488',
+            borderWidth: 1
+        }]
+    };
+    const koreaRndInvestmentChartCtx = document.getElementById('koreaRndInvestmentChart').getContext('2d');
+    new Chart(koreaRndInvestmentChartCtx, {
+        type: 'bar',
+        data: koreaRndInvestmentData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: '규모 (조 원)' }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    const vcInvestmentData = {
+        labels: ['모빌리티/운송 (탄소배출 16%)', '제조/식품/농업/건설 (탄소배출 84%)'],
+        datasets: [{
+            label: 'VC 투자 비중',
+            data: [61, 39],
+            backgroundColor: ['#0ea5e9', '#0d9488'],
+            hoverOffset: 4
+        }]
+    };
+    const vcInvestmentCtx = document.getElementById('vcInvestmentChart').getContext('2d');
+    new Chart(vcInvestmentCtx, {
+        type: 'doughnut',
+        data: vcInvestmentData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed !== null) {
+                                label += context.parsed + '%';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const accentureModelsData = [
+        {
+            icon: '🔄',
+            title: '순환 공급망',
+            description: '재생 가능, 재활용 가능 또는 생분해성 소재를 사용하여 제품의 생산 및 소비 과정에서 발생하는 폐기물을 최소화하고, 자원 효율성을 극대화하여 비용을 절감하고 공급망의 예측 가능성을 높입니다. 이는 자원의 무한 재활용을 지향하며 지속가능한 생산 시스템을 구축하는 데 핵심적인 모델입니다.'
+        },
+        {
+            icon: '🤝',
+            title: '공유 플랫폼',
+            description: '디지털 기술을 활용하여 유휴 자산(제품)을 대여, 공유, 교환함으로써 자원 사용을 최적화하고 제품의 활용도를 높입니다. 이는 개인과 기업 간의 새로운 소비 및 비즈니스 관계를 형성하며, 소유 기반 경제에서 접근 기반 경제로의 전환을 촉진합니다.'
+        },
+        {
+            icon: '💡',
+            title: '서비스형 제품',
+            description: '제품 소유가 아닌 사용에 대한 비용을 지불하게 함으로써 기업이 제품의 수명, 신뢰성, 재사용성에 집중하게 합니다. 이는 기업에게 제품의 유지보수 및 회수에 대한 인센티브를 제공하고, 소비자에게는 초기 구매 부담을 줄여주며 지속가능한 소비를 유도합니다.'
+        },
+        {
+            icon: '🛠️',
+            title: '제품 수명 연장',
+            description: '수리, 업그레이드, 재제조, 재판매 등을 통해 제품의 경제적 유용성을 최대한 오래 유지합니다. 이는 제품의 설계 단계부터 내구성과 수리 용이성을 고려하게 하며, 폐기물 발생을 최소화하고 자원 낭비를 줄여줍니다.'
+        },
+        {
+            icon: '♻️',
+            title: '회수 및 재활용',
+            description: '폐기물로 간주되던 모든 것을 다른 용도로 재활용하여 생산 및 소비 시스템에서 가치를 회수합니다. 이는 수명이 다한 제품에서 귀중한 재료, 에너지, 부품을 회수하거나 생산 공정에서 발생하는 폐기물 및 부산물을 재활용하는 것을 포함하여, 자원의 완전한 순환을 목표로 합니다.'
+        }
+    ];
+
+    const modelsContainer = document.getElementById('accenture-models');
+    modelsContainer.innerHTML = ''; // Clear existing cards
+    accentureModelsData.forEach((model) => {
+        const card = document.createElement('div');
+        card.className = 'clickable-card';
+        card.innerHTML = `
+            <div class="text-4xl">${model.icon}</div>
+            <h5 class="mt-4 text-lg font-bold text-slate-800">${model.title}</h5>
+        `;
+        modelsContainer.appendChild(card);
+
+        card.addEventListener('click', () => {
+            openDetailModal(model.title, model.description);
+        });
+    });
+
+    const orgsData = [
+        { name: '엠와이소셜컴퍼니(MYSC)', role: '임팩트 투자 & 생태계 조성', synergy: '민간 자본 유치, 액셀러레이팅, 글로벌 네트워크를 제공하여 전북의 기후테크 생태계 성장 촉진 및 사일로 효과 극복. MYSC는 혼합금융 기반 ESG 임팩트 투자 사업을 통해 다양한 형태의 자본을 블렌딩하여 임팩트 생태계를 확장하고, 국경을 넘는 사회적 임팩트를 위한 기술(CTS) 이니셔티브를 통해 국내 기술 기업의 개발도상국 진출을 지원합니다.' },
+        { name: '전북테크노파크', role: '기술개발 및 사업화', synergy: '지역 우수 기술 발굴(전북TP)과 MYSC의 임팩트 투자 및 액셀러레이팅 역량을 연계하여 유망 스타트업의 기술 상용화 및 스케일업을 지원하고, "죽음의 계곡"을 극복하도록 협력합니다.' },
+        { name: '한국식품산업클러스터진흥원', role: '식품산업 특화', synergy: '전북의 핵심 산업인 식품 분야에서 음식물 쓰레기 업사이클링, 친환경 패키징 등 순환경제 솔루션에 특화된 스타트업을 MYSC와 공동 발굴 및 투자 육성하여 전북 식품 산업의 환경적, 경제적 가치를 동시에 높입니다.' },
+        { name: '전북창조경제혁신센터', role: '초기 스타트업 육성', synergy: '창조경제혁신센터의 초기 스타트업 발굴 및 공공 투자 기능(SAFE 투자, 전용 펀드)과 MYSC의 후속 투자 및 글로벌 액셀러레이팅 역량을 연계하여 전북 지역 기후테크 스타트업을 위한 유기적인 성장 사다리를 구축합니다.' },
+        { name: '전북경제통상진흥원', role: '판로 및 해외 진출', synergy: '경제통상진흥원의 기존 국내외 판로 개척 지원 인프라와 MYSC의 글로벌 임팩트 투자 네트워크 및 해외 시장 진출 경험을 결합하여 전북 기후테크-순환경제 스타트업의 글로벌 경쟁력 강화 및 해외 시장 성공적 진출을 지원합니다.' }
+    ];
+
+    const orgsContainer = document.getElementById('org-cards');
+    orgsContainer.innerHTML = ''; // Clear existing cards
+    orgsData.forEach(org => {
+        const card = document.createElement('div');
+        card.className = 'clickable-card';
+        card.innerHTML = `
+            <p class="font-bold text-slate-800 text-center">${org.name}</p>
+            <p class="text-sm text-teal-600 mt-2">${org.role}</p>
+        `;
+        orgsContainer.appendChild(card);
+        card.addEventListener('click', () => {
+            openDetailModal(org.name + ' (' + org.role + ')', org.synergy);
+        });
+    });
+
+    // General Detail Modal
+    const detailModal = document.createElement('div');
+    detailModal.id = 'detail-modal';
+    detailModal.className = 'modal-overlay hidden';
+    detailModal.innerHTML = `
+        <div class="modal-content">
+            <button class="modal-close-btn" id="close-detail-modal">&times;</button>
+            <h3 id="detail-modal-title" class="text-2xl font-bold text-slate-900 mb-4"></h3>
+            <div id="detail-modal-content" class="text-slate-700 text-base leading-relaxed"></div>
+        </div>
+    `;
+    document.body.appendChild(detailModal);
+
+    const closeDetailModalBtn = document.getElementById('close-detail-modal');
+    closeDetailModalBtn.addEventListener('click', () => {
+        detailModal.classList.add('hidden');
+    });
+    detailModal.addEventListener('click', (event) => {
+        if (event.target === detailModal) {
+            detailModal.classList.add('hidden');
+        }
+    });
+
+    function openDetailModal(title, content) {
+        document.getElementById('detail-modal-title').textContent = title;
+        document.getElementById('detail-modal-content').innerHTML = content;
+        detailModal.classList.remove('hidden');
+    }
+
+
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    const navLinks = document.querySelectorAll('a.nav-link'); 
+    const sections = document.querySelectorAll('section');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 100) { 
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') && link.getAttribute('href').includes(current)) { 
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+    });
+
+    // Idea Generator Modal elements
+    const ideaModal = document.getElementById('idea-modal');
+    const openIdeaModalDesktopBtn = document.getElementById('open-idea-modal-desktop');
+    const openIdeaModalMobileBtn = document.getElementById('open-idea-modal-mobile');
+    const closeIdeaModalBtn = document.getElementById('close-idea-modal');
+    const ideaInput = document.getElementById('idea-input');
+    const generateIdeaBtn = document.getElementById('generate-idea-btn');
+    const ideaResultsDiv = document.getElementById('idea-results');
+    const ideaContentDiv = document.getElementById('idea-content');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const buttonText = document.getElementById('button-text');
+
+    // Open idea modal functions
+    if (openIdeaModalDesktopBtn) {
+        openIdeaModalDesktopBtn.addEventListener('click', () => {
+            ideaModal.classList.remove('hidden');
+            if (mobileMenu) mobileMenu.classList.add('hidden'); // Close mobile menu if open
+        });
+    }
+    if (openIdeaModalMobileBtn) {
+        openIdeaModalMobileBtn.addEventListener('click', () => {
+            ideaModal.classList.remove('hidden');
+            if (mobileMenu) mobileMenu.classList.add('hidden'); // Close mobile menu if open
+        });
+    }
+
+    // Close idea modal functions
+    closeIdeaModalBtn.addEventListener('click', () => {
+        ideaModal.classList.add('hidden');
+        ideaInput.value = ''; // Clear input on close
+        ideaContentDiv.innerHTML = ''; // Clear results on close
+        ideaResultsDiv.classList.add('hidden'); // Hide results div
+    });
+    // Close idea modal when clicking outside of the content
+    ideaModal.addEventListener('click', (event) => {
+        if (event.target === ideaModal) {
+            ideaModal.classList.add('hidden');
+            ideaInput.value = ''; 
+            ideaContentDiv.innerHTML = '';
+            ideaResultsDiv.classList.add('hidden');
+        }
+    });
+
+    // Gemini API Integration for Idea Generation
+    generateIdeaBtn.addEventListener('click', async () => {
+        const userInput = ideaInput.value.trim();
+        if (!userInput) {
+            ideaContentDiv.innerHTML = '<p class="text-red-500">산업 분야 또는 폐기물 유형을 입력해주세요.</p>';
+            ideaResultsDiv.classList.remove('hidden');
+            return;
+        }
+
+        ideaContentDiv.innerHTML = ''; // Clear previous results
+        ideaResultsDiv.classList.remove('hidden'); // Ensure results div is visible
+        loadingIndicator.classList.remove('hidden'); // Show loading spinner
+        buttonText.textContent = '아이디어 생성 중...';
+        generateIdeaBtn.disabled = true;
+
+        let chatHistory = [];
+        const prompt = `Generate 3 innovative circular economy business ideas for the "${userInput}" sector or waste type in Korean. Each idea should include:
+        1. A brief title.
+        2. A one-sentence description.
+        3. Which of Accenture's 5 circular economy models (순환 공급망, 공유 플랫폼, 서비스형 제품, 제품 수명 연장, 회수 및 재활용) it primarily aligns with.
+        Format as a numbered list with Korean titles and descriptions.`;
+        
+        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+        const payload = { contents: chatHistory };
+        const apiKey = ""; 
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                const text = result.candidates[0].content.parts[0].text;
+                ideaContentDiv.innerHTML = text.replace(/\n/g, '<br>'); // Display response with line breaks
+            } else {
+                ideaContentDiv.innerHTML = '<p class="text-red-500">아이디어를 생성하는 데 실패했습니다. 다시 시도해주세요.</p>';
+            }
+        } catch (error) {
+            console.error('Error calling Gemini API:', error);
+            ideaContentDiv.innerHTML = `<p class="text-red-500">오류가 발생했습니다: ${error.message}. 인터넷 연결 또는 API 설정을 확인해주세요.</p>`;
+        } finally {
+            loadingIndicator.classList.add('hidden'); // Hide loading spinner
+            buttonText.textContent = '아이디어 생성';
+            generateIdeaBtn.disabled = false;
+        }
+    });
+});
+</script>
+</body>
+</html>
